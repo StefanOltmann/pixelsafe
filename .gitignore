@@ -7,5 +7,6 @@
 .gradle
 .idea
 .kotlin
+/output/
 captures
 local.properties

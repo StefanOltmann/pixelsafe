@@ -6,42 +6,53 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.androidGitVersion)
+    alias(libs.plugins.hydraulicConveyor)
 }
 
-val wasmActivated = true
+group = "io.github.stefanoltmann"
+
+androidGitVersion {
+    format = "%tag%"
+}
+
+version = androidGitVersion.name()
+
+logger.lifecycle("App version $version (Code: ${androidGitVersion.code()})")
+
+val buildTarget = System.getProperty("BUILD_TARGET") ?: ""
 
 kotlin {
 
     jvm()
 
-    if (wasmActivated) {
+    jvmToolchain(jdkVersion = 17)
 
-        @OptIn(ExperimentalWasmDsl::class)
-        wasmJs {
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
 
-            moduleName = "app"
+        moduleName = "app"
 
-            browser {
+        browser {
 
-                val rootDirPath = project.rootDir.path
-                val projectDirPath = project.projectDir.path
+            val rootDirPath = project.rootDir.path
+            val projectDirPath = project.projectDir.path
 
-                commonWebpackConfig {
+            commonWebpackConfig {
 
-                    outputFileName = "app.js"
+                outputFileName = "app.js"
 
-                    devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                        static = (static ?: mutableListOf()).apply {
-                            // Serve sources to debug inside browser
-                            add(rootDirPath)
-                            add(projectDirPath)
-                        }
+                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    static = (static ?: mutableListOf()).apply {
+                        // Serve sources to debug inside browser
+                        add(rootDirPath)
+                        add(projectDirPath)
                     }
                 }
             }
-
-            binaries.executable()
         }
+
+        binaries.executable()
     }
 
     sourceSets {
@@ -82,9 +93,57 @@ compose.desktop {
         mainClass = "MainKt"
 
         nativeDistributions {
+
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "de.stefan_oltmann.pixelsafe"
-            packageVersion = "1.0.0"
+
+            packageName = "PixelSafe"
+
+            if (androidGitVersion.code() == 0) {
+
+                /* Values for the dev version. */
+                packageVersion = "1.0.0"
+
+            } else {
+
+                packageVersion = version.toString()
+            }
+
+            macOS {
+                iconFile.set(project.file("../icon/icon.icns"))
+            }
+
+            windows {
+                iconFile.set(project.file("../icon/icon.ico"))
+            }
+
+            linux {
+                iconFile.set(project.file("../icon/icon.png"))
+            }
         }
     }
 }
+
+dependencies {
+
+    /*
+     * This is required because the wasmJS target can't build
+     * with this Desktop-specific configuration in place.
+     * It's a Hydraulic Conveyor bug.
+     */
+    if (buildTarget == "desktop") {
+
+        linuxAmd64(compose.desktop.linux_x64)
+        macAmd64(compose.desktop.macos_x64)
+        macAarch64(compose.desktop.macos_arm64)
+        windowsAmd64(compose.desktop.windows_x64)
+    }
+}
+
+// region Work around temporary Compose bugs.
+configurations.all {
+    attributes {
+        // https://github.com/JetBrains/compose-jb/issues/1404#issuecomment-1146894731
+        attribute(Attribute.of("ui", String::class.java), "awt")
+    }
+}
+// endregion
