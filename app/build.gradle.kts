@@ -20,7 +20,10 @@ version = androidGitVersion.name()
 
 logger.lifecycle("App version $version (Code: ${androidGitVersion.code()})")
 
-val buildTarget = System.getenv("BUILD_TARGET") ?: ""
+val buildTarget: String? = System.getenv("BUILD_TARGET")
+
+if (buildTarget == null)
+    error("BUILD_TARGET environment variable not set. Please set it to 'desktop' or 'web'.")
 
 kotlin {
 
@@ -28,31 +31,34 @@ kotlin {
 
     jvmToolchain(jdkVersion = 17)
 
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
+    if (buildTarget == "web") {
 
-        moduleName = "app"
+        @OptIn(ExperimentalWasmDsl::class)
+        wasmJs {
 
-        browser {
+            moduleName = "app"
 
-            val rootDirPath = project.rootDir.path
-            val projectDirPath = project.projectDir.path
+            browser {
 
-            commonWebpackConfig {
+                val rootDirPath = project.rootDir.path
+                val projectDirPath = project.projectDir.path
 
-                outputFileName = "app.js"
+                commonWebpackConfig {
 
-                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
-                        add(rootDirPath)
-                        add(projectDirPath)
+                    outputFileName = "app.js"
+
+                    devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                        static = (static ?: mutableListOf()).apply {
+                            // Serve sources to debug inside browser
+                            add(rootDirPath)
+                            add(projectDirPath)
+                        }
                     }
                 }
             }
-        }
 
-        binaries.executable()
+            binaries.executable()
+        }
     }
 
     sourceSets {
@@ -126,9 +132,8 @@ compose.desktop {
 dependencies {
 
     /*
-     * This is required because the wasmJS target can't build
-     * with this Desktop-specific configuration in place.
-     * It's a Hydraulic Conveyor bug.
+     * Workaround for a bug in Hydraulic Conveyor 18:
+     * It does not support wasmJS target.
      */
     if (buildTarget == "desktop") {
 
