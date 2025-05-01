@@ -1,0 +1,26 @@
+{
+  "name": "PixelSafe",
+  "short_name": "PixelSafe",
+  "description": "Steganography tool for PNG images",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "icon_114.png",
+      "sizes": "114x114",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
