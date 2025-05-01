@@ -17,37 +17,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
-import io.github.vinceglb.filekit.parent
-import io.github.vinceglb.filekit.path
+import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.write
-import java.awt.Desktop
 
-actual suspend fun saveFullBytes(
-    file: PlatformFile,
-    bytes: ByteArray
-) {
+private val downloadsDir =
+    PlatformFile(System.getProperty("user.home") + "/Downloads")
 
-    file.write(bytes)
-}
-
-actual suspend fun saveHiddenBytes(
-    file: PlatformFile,
+actual suspend fun saveBytes(
     fileName: String,
     bytes: ByteArray
-) {
+): Boolean {
 
-    val parent = file.parent()
-
-    if (parent == null)
-        error("File has no parent: $file")
-
-    val file = PlatformFile(
-        path = parent.path + "/" + fileName
+    val destinationFile = FileKit.openFileSaver(
+        suggestedName = fileName.substringBeforeLast("."),
+        extension = fileName.substringAfter(".", "data"),
+        directory = downloadsDir
     )
 
-    file.write(bytes)
+    destinationFile?.write(bytes)
 
-    /* Open file */
-    Desktop.getDesktop().open(file.file)
+    return destinationFile != null
 }

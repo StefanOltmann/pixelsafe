@@ -17,18 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import io.github.vinceglb.filekit.FileKit
-import io.github.vinceglb.filekit.download
+package ui
 
-actual suspend fun saveBytes(
-    fileName: String,
-    bytes: ByteArray
-): Boolean {
+enum class ToastType {
 
-    FileKit.download(
-        bytes = bytes,
-        fileName = fileName
-    )
-
-    return true
+    SUCCESS,
+    ERROR
 }

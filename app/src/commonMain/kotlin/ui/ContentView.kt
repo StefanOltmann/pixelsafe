@@ -38,11 +38,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,18 +56,24 @@ import io.github.vinceglb.filekit.dialogs.openFilePicker
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.size
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import org.jetbrains.skia.Image
-import saveFullBytes
-import saveHiddenBytes
+import saveBytes
 import ui.icons.AppIcon
 import util.SteganographyUtil
 import kotlin.math.max
 
+const val UI_UPDATE_DELAY = 100L
+
 @Composable
 fun ContentView(
     scrollState: ScrollState,
-    showToast: (String) -> Unit
+    blockUserInput: MutableState<Boolean>,
+    showToast: (Toast) -> Unit
 ) {
 
     Column(
@@ -81,25 +86,13 @@ fun ContentView(
 
         val coroutineScope = rememberCoroutineScope()
 
-        var selectedFile: PlatformFile? by remember { mutableStateOf(null) }
+        val selectedFileState: MutableState<PlatformFile?> = remember { mutableStateOf(null) }
 
-        var originalBytes: ByteArray? by remember { mutableStateOf(null) }
+        val originalBytesState: MutableState<ByteArray?> = remember { mutableStateOf(null) }
 
-        val image: Image? = remember(originalBytes) {
+        val imageState: MutableState<Image?> = remember { mutableStateOf(null) }
 
-            try {
-
-                originalBytes?.let { Image.Companion.makeFromEncoded(it) }
-
-            } catch (ex: Exception) {
-
-                showToast("Can't load image.")
-
-                ex.printStackTrace()
-
-                null
-            }
-        }
+        val hiddenBytesState: MutableState<Pair<String, ByteArray>?> = remember { mutableStateOf(null) }
 
         Row(
             verticalAlignment = Alignment.Companion.CenterVertically,
@@ -138,17 +131,14 @@ fun ContentView(
 
                 coroutineScope.launch {
 
-                    val file = FileKit.openFilePicker(
-                        type = FileKitType.File(extensions = listOf("png", "PNG")),
-                        title = "Select PNG image to hide data in",
+                    loadImage(
+                        selectedFileState,
+                        originalBytesState,
+                        imageState,
+                        hiddenBytesState,
+                        blockUserInput,
+                        showToast
                     )
-
-                    if (file != null) {
-
-                        selectedFile = file
-
-                        originalBytes = file.readBytes()
-                    }
                 }
             }
         ) {
@@ -167,10 +157,14 @@ fun ContentView(
                     width = 288.dp,
                     height = 192.dp
                 )
-                .border(1.dp, Color.Companion.Black, MaterialTheme.shapes.medium)
+                .border(
+                    width = 1.dp,
+                    color = Color.Black,
+                    shape = MaterialTheme.shapes.medium
+                )
         ) {
 
-            if (image != null) {
+            imageState.value?.let { image ->
 
                 androidx.compose.foundation.Image(
                     bitmap = image.toComposeImageBitmap(),
@@ -183,14 +177,10 @@ fun ContentView(
             modifier = Modifier.Companion.height(8.dp)
         )
 
-        if (image != null) {
+        imageState.value?.let { image ->
 
             val storageSize = remember(image) {
                 SteganographyUtil.calculateHiddenSpaceInBytes(image)
-            }
-
-            val hiddenBytes = remember(image) {
-                SteganographyUtil.readLeastSignificantBits(image)
             }
 
             Column(
@@ -212,9 +202,11 @@ fun ContentView(
                     fontSize = 14.sp
                 )
 
-                if (hiddenBytes != null) {
+                val currentHiddenBytes = hiddenBytesState.value
 
-                    val kbAmount = max(1, hiddenBytes.second.size / 1024)
+                if (currentHiddenBytes != null) {
+
+                    val kbAmount = max(1, currentHiddenBytes.second.size / 1024)
 
                     Text(
                         text = "Currently stores $kbAmount kb of data:",
@@ -222,7 +214,7 @@ fun ContentView(
                     )
 
                     Text(
-                        text = hiddenBytes.first,
+                        text = currentHiddenBytes.first,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 14.sp
@@ -248,33 +240,14 @@ fun ContentView(
 
                     coroutineScope.launch {
 
-                        val file = FileKit.openFilePicker(
-                            title = "Select secret data to hide in image"
+                        hideDataInImage(
+                            storageSize,
+                            image,
+                            originalBytesState,
+                            hiddenBytesState,
+                            blockUserInput,
+                            showToast
                         )
-
-                        if (file != null) {
-
-                            if (file.size() > storageSize) {
-
-                                showToast("File is too large to be hidden in image.")
-
-                                return@launch
-                            }
-
-                            /*
-                             * Replace the bytes
-                             */
-
-                            val bytesToHide = file.readBytes()
-
-                            val modifiedImage = SteganographyUtil.writeLeastSignificantBits(
-                                image = image,
-                                fileName = file.name,
-                                byteArray = bytesToHide
-                            )
-
-                            originalBytes = modifiedImage.encodeToData()!!.bytes
-                        }
                     }
                 }
             ) {
@@ -284,16 +257,16 @@ fun ContentView(
 
             Button(
                 modifier = Modifier.Companion.width(288.dp),
+                enabled = hiddenBytesState.value != null,
                 onClick = {
-
-                    if (hiddenBytes == null)
-                        return@Button
 
                     coroutineScope.launch {
 
-                        /* Write new bytes to file */
-
-                        saveHiddenBytes(selectedFile!!, hiddenBytes.first, hiddenBytes.second)
+                        saveHiddenData(
+                            hiddenBytesState,
+                            blockUserInput,
+                            showToast
+                        )
                     }
                 }
             ) {
@@ -301,18 +274,21 @@ fun ContentView(
                 Text("Save hidden data to disk")
             }
 
+            val selectedFileName = selectedFileState.value?.name
+
             Button(
                 modifier = Modifier.Companion.width(288.dp),
+                enabled = originalBytesState.value != null && selectedFileName != null && hiddenBytesState.value != null,
                 onClick = {
 
-                    if (originalBytes == null)
-                        return@Button
+                    coroutineScope.launch(Dispatchers.Default) {
 
-                    coroutineScope.launch {
-
-                        /* Write new bytes to file */
-
-                        saveFullBytes(selectedFile!!, originalBytes!!)
+                        saveModifiedBytes(
+                            originalBytesState,
+                            selectedFileName,
+                            blockUserInput,
+                            showToast
+                        )
                     }
                 }
             ) {
@@ -320,5 +296,187 @@ fun ContentView(
                 Text("Save modified image to disk")
             }
         }
+    }
+}
+
+private suspend fun loadImage(
+    selectedFileState: MutableState<PlatformFile?>,
+    originalBytesState: MutableState<ByteArray?>,
+    imageState: MutableState<Image?>,
+    hiddenBytesState: MutableState<Pair<String, ByteArray>?>,
+    blockUserInput: MutableState<Boolean>,
+    showToast: (Toast) -> Unit
+) = withContext(Dispatchers.Default) {
+
+    val file = FileKit.openFilePicker(
+        type = FileKitType.File(extensions = listOf("png", "PNG")),
+        title = "Select PNG image to hide data in",
+    )
+
+    if (file != null) {
+
+        try {
+
+            blockUserInput.value = true
+
+            /* Let the UI update */
+            delay(UI_UPDATE_DELAY)
+
+            val bytes = file.readBytes()
+
+            withContext(Dispatchers.Main) {
+                selectedFileState.value = file
+                originalBytesState.value = bytes
+            }
+
+            yield()
+
+            val image = Image.Companion.makeFromEncoded(bytes)
+            val hiddenBytes = SteganographyUtil.readLeastSignificantBits(image)
+
+            withContext(Dispatchers.Main) {
+                imageState.value = image
+                hiddenBytesState.value = hiddenBytes
+            }
+
+        } catch (ex: Exception) {
+
+            showToast(Toast(ToastType.ERROR, "Can't load image."))
+
+            ex.printStackTrace()
+
+            null
+
+        } finally {
+
+            blockUserInput.value = false
+        }
+    }
+}
+
+private suspend fun hideDataInImage(
+    storageSize: Long,
+    image: Image,
+    originalBytesState: MutableState<ByteArray?>,
+    hiddenBytesState: MutableState<Pair<String, ByteArray>?>,
+    blockUserInput: MutableState<Boolean>,
+    showToast: (Toast) -> Unit
+) = withContext(Dispatchers.Default) {
+
+    val file = FileKit.openFilePicker(
+        title = "Select secret data to hide in image"
+    )
+
+    if (file != null) {
+
+        if (file.size() > storageSize) {
+
+            showToast(Toast(ToastType.ERROR, "File is too large to be hidden in image."))
+
+            return@withContext
+        }
+
+        /*
+         * Replace the bytes
+         */
+
+        try {
+
+            blockUserInput.value = true
+
+            /* Let the UI update */
+            delay(UI_UPDATE_DELAY)
+
+            val bytesToHide = file.readBytes()
+
+            yield()
+
+            val modifiedImage = SteganographyUtil.writeLeastSignificantBits(
+                image = image,
+                fileName = file.name,
+                byteArray = bytesToHide
+            )
+
+            yield()
+
+            val newBytes = modifiedImage.encodeToData()!!.bytes
+
+            withContext(Dispatchers.Main) {
+
+                originalBytesState.value = newBytes
+                hiddenBytesState.value = file.name to bytesToHide
+            }
+
+            showToast(Toast(ToastType.SUCCESS, "Data hidden in image."))
+
+        } finally {
+
+            blockUserInput.value = false
+        }
+    }
+}
+
+private suspend fun saveHiddenData(
+    hiddenBytesState: MutableState<Pair<String, ByteArray>?>,
+    blockUserInput: MutableState<Boolean>,
+    showToast: (Toast) -> Unit
+) = withContext(Dispatchers.Default) {
+
+    val hiddenBytes = hiddenBytesState.value
+        ?: return@withContext
+
+    /* Write new bytes to file */
+
+    try {
+
+        blockUserInput.value = true
+
+        /* Let the UI update */
+        delay(UI_UPDATE_DELAY)
+
+        val saved = saveBytes(
+            fileName = hiddenBytes.first,
+            bytes = hiddenBytes.second
+        )
+
+        if (saved)
+            showToast(Toast(ToastType.SUCCESS, "Hidden data saved to disk."))
+
+    } finally {
+
+        blockUserInput.value = false
+    }
+}
+
+private suspend fun saveModifiedBytes(
+    originalBytesState: MutableState<ByteArray?>,
+    selectedFileName: String?,
+    blockUserInput: MutableState<Boolean>,
+    showToast: (Toast) -> Unit
+) = withContext(Dispatchers.Default) {
+
+    if (originalBytesState.value == null || selectedFileName == null)
+        return@withContext
+
+    /* Write new bytes to file */
+
+    try {
+
+        blockUserInput.value = true
+
+        /* Let the UI update */
+        delay(UI_UPDATE_DELAY)
+
+        val saved = saveBytes(
+            fileName = selectedFileName,
+            bytes = originalBytesState.value!!
+        )
+
+        if (saved)
+            showToast(Toast(ToastType.SUCCESS, "Modified image saved to disk."))
+
+    } finally {
+
+        blockUserInput.value = false
     }
 }

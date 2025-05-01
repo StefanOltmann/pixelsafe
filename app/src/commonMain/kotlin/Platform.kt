@@ -17,8 +17,4 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import io.github.vinceglb.filekit.PlatformFile
-
-expect suspend fun saveFullBytes(file: PlatformFile, bytes: ByteArray)
-
-expect suspend fun saveHiddenBytes(file: PlatformFile, fileName: String, bytes: ByteArray)
+expect suspend fun saveBytes(fileName: String, bytes: ByteArray): Boolean

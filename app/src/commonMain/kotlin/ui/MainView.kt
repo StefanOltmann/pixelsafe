@@ -24,9 +24,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.defaultScrollbarStyle
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -39,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -50,18 +53,20 @@ fun MainView() {
 
     val scrollState = rememberScrollState()
 
-    val toastMessage = remember { mutableStateOf("") }
+    val currentToast = remember { mutableStateOf<Toast?>(null) }
+
+    val blockUserInput = remember { mutableStateOf(false) }
 
     /*
      * Reset toast messages
      */
-    LaunchedEffect(toastMessage.value) {
+    LaunchedEffect(currentToast.value) {
 
-        if (toastMessage.value.isNotEmpty()) {
+        if (currentToast.value != null) {
 
             delay(3000L)
 
-            toastMessage.value = ""
+            currentToast.value = null
         }
     }
 
@@ -69,8 +74,9 @@ fun MainView() {
 
         ContentView(
             scrollState = scrollState,
-            showToast = { message ->
-                toastMessage.value = message
+            blockUserInput = blockUserInput,
+            showToast = { toast ->
+                currentToast.value = toast
             }
         )
 
@@ -83,8 +89,29 @@ fun MainView() {
             )
         )
 
+        if (blockUserInput.value) {
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .background(Color.White.copy(alpha = 0.8f))
+                    .fillMaxSize()
+                    .clickable {
+                        /* Block user input */
+                    }
+            ) {
+
+                Text(
+                    text = "Working ...",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+
         AnimatedVisibility(
-            visible = toastMessage.value.isNotEmpty(),
+            visible = currentToast.value != null,
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier
@@ -93,18 +120,29 @@ fun MainView() {
                 .padding(bottom = 16.dp)
         ) {
 
+            val toast = currentToast.value ?: return@AnimatedVisibility
+
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = MaterialTheme.shapes.medium,
+                        ambientColor = Color.Black,
+                        spotColor = Color.Black
+                    )
                     .background(
-                        Color.Red,
+                        Color.White,
                         MaterialTheme.shapes.medium
                     )
             ) {
 
                 Text(
-                    text = toastMessage.value,
-                    color = Color.White,
+                    text = toast.message,
+                    color = if (toast.type == ToastType.SUCCESS)
+                        Color(0xFF006400)
+                    else
+                        Color.Red,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(16.dp)
