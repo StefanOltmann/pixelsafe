@@ -20,7 +20,7 @@ version = androidGitVersion.name()
 
 logger.lifecycle("App version $version (Code: ${androidGitVersion.code()})")
 
-val buildTarget = System.getProperty("BUILD_TARGET") ?: ""
+val buildTarget = System.getenv("BUILD_TARGET") ?: "desktop"
 
 kotlin {
 
