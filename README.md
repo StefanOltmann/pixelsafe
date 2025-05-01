@@ -10,6 +10,7 @@ You can use it to hide backup files, send private messages, embed digital signat
 ## Acknowledgements
 
 * JetBrains for making [Kotlin](https://kotlinlang.org).
+* Vincent Guillebaud for making [FileKit](https://github.com/vinceglb/FileKit).
 * Mike Hearn for making [Hydraulic Conveyor](https://conveyor.hydraulic.dev).
 * Yahor for making the [Valkyrie IDEA plugin](https://github.com/ComposeGears/Valkyrie).
 
