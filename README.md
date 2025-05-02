@@ -2,6 +2,10 @@
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](httpw://kotlinlang.org)
 
+<a href="https://apps.microsoft.com/detail/9PK3MLFQ1JBF?mode=popup">
+    <img src="https://get.microsoft.com/images/en-us%20dark.svg" alt="Download from Microsoft Store">
+</a>
+
 PixelSafe is a steganography tool for PNG images that uses the Least Significant Bit (LSB) algorithm.
 
 It lets you embed hidden data inside PNG files - for example, storing a KeePass database inside a screenshot.
