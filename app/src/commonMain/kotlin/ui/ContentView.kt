@@ -62,7 +62,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.jetbrains.skia.Image
 import saveBytes
-import ui.icons.AppIcon
+import ui.icons.Logo
 import util.SteganographyUtil
 import kotlin.math.max
 
@@ -93,22 +93,11 @@ fun ContentView(
 
         val hiddenBytesState: MutableState<Pair<String, ByteArray>?> = remember { mutableStateOf(null) }
 
-        Row(
-            verticalAlignment = Alignment.Companion.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-
-            androidx.compose.foundation.Image(
-                imageVector = AppIcon,
-                contentDescription = null,
-                modifier = Modifier.Companion.size(64.dp)
-            )
-
-            Text(
-                text = APP_NAME,
-                fontSize = 40.sp
-            )
-        }
+        androidx.compose.foundation.Image(
+            imageVector = Logo,
+            contentDescription = null,
+            modifier = Modifier.Companion.height(64.dp)
+        )
 
         Spacer(
             modifier = Modifier.Companion.height(8.dp)

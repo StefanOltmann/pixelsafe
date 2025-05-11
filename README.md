@@ -1,4 +1,4 @@
-# PixelSafe
+<img src="assets/logo.svg" height="128" alt="PixelSafe">
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](httpw://kotlinlang.org)
 
