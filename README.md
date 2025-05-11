@@ -29,3 +29,6 @@ PixelSafe is licensed under the GNU Affero General Public License (AGPL),
 ensuring the community's freedom to use, modify, and distribute the software.
 
 Icons are sourced from Google Material Design.
+
+The PixelSafe logo is a copyrighted, professionally commissioned design.
+Please do not reuse it in forks; create your own instead.

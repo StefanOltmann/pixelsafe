@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -99,10 +98,10 @@ fun ContentView(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            Icon(
+            androidx.compose.foundation.Image(
                 imageVector = AppIcon,
                 contentDescription = null,
-                modifier = Modifier.Companion.size(48.dp)
+                modifier = Modifier.Companion.size(64.dp)
             )
 
             Text(

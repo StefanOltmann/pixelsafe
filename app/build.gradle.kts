@@ -20,10 +20,7 @@ version = androidGitVersion.name()
 
 logger.lifecycle("App version $version (Code: ${androidGitVersion.code()})")
 
-val buildTarget: String? = System.getenv("BUILD_TARGET")
-
-if (buildTarget == null)
-    error("BUILD_TARGET environment variable not set. Please set it to 'desktop' or 'web'.")
+val buildTarget: String? = System.getenv("BUILD_TARGET") ?: "desktop"
 
 kotlin {
 

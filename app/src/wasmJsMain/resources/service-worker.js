@@ -2,7 +2,7 @@
  * Service Worker for PixelSafe app
  */
 
-const CACHE_NAME = 'pixelsafe-cache-v1';
+const CACHE_NAME = 'pixelsafe-cache-v2';
 
 const ASSETS_TO_CACHE = [
     './',
