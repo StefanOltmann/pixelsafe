@@ -76,15 +76,23 @@ kotlin {
 
             /* Skiko */
             implementation("org.jetbrains.skiko:skiko:0.9.4")
+
+            /* Cryptography */
+            implementation("dev.whyoleg.cryptography:cryptography-core:0.4.0")
         }
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:0.4.0")
         }
 
         jvmTest.dependencies {
             implementation("org.jetbrains.kotlin:kotlin-test:2.1.20")
+        }
+
+        wasmJsMain.dependencies {
+            implementation("dev.whyoleg.cryptography:cryptography-provider-webcrypto:0.4.0")
         }
     }
 }
