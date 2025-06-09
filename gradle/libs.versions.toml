@@ -4,9 +4,26 @@ kotlin = "2.1.21"
 kotlinx-coroutines = "1.10.2"
 androidGitVersion = "0.4.14"
 hydraulicConveyor = "1.12"
+filekit = "0.10.0-beta02"
+skiko = "0.9.4"
+cryptography = "0.4.0"
 
 [libraries]
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+
+# FileKit
+filekit-core = { group = "io.github.vinceglb", name = "filekit-core", version.ref = "filekit" }
+filekit-dialogs = { group = "io.github.vinceglb", name = "filekit-dialogs", version.ref = "filekit" }
+filekit-dialogs-compose = { group = "io.github.vinceglb", name = "filekit-dialogs-compose", version.ref = "filekit" }
+
+# Skiko
+skiko = { group = "org.jetbrains.skiko", name = "skiko", version.ref = "skiko" }
+
+# Cryptography
+cryptography-core = { group = "dev.whyoleg.cryptography", name = "cryptography-core", version.ref = "cryptography" }
+cryptography-provider-jdk = { group = "dev.whyoleg.cryptography", name = "cryptography-provider-jdk", version.ref = "cryptography" }
+cryptography-provider-webcrypto = { group = "dev.whyoleg.cryptography", name = "cryptography-provider-webcrypto", version.ref = "cryptography" }
 
 [plugins]
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
