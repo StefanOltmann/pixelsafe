@@ -13,7 +13,11 @@ plugins {
 group = "io.github.stefanoltmann"
 
 androidGitVersion {
-    format = "%tag%"
+
+    if (buildTarget == "web")
+        format = "%commit%"
+    else
+        format = "%tag%"
 }
 
 version = androidGitVersion.name()
@@ -165,7 +169,7 @@ project.afterEvaluate {
     file.printWriter().use { writer ->
 
         writer.println("/** Current app version. */")
-        writer.println("const val APP_VERSION: String = \"${project.rootProject.version}\"")
+        writer.println("const val APP_VERSION: String = \"${project.version}\"")
 
         writer.flush()
     }
