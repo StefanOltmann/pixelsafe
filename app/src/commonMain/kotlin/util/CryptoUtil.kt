@@ -111,29 +111,23 @@ object CryptoUtil {
         if (key == null)
             return encryptedBytes
 
-        return tryDecrypt(encryptedBytes, key)
+        return decrypt(encryptedBytes, key)
     }
 
     /**
-     * Tries to decrypt the provided encrypted byte array using the specified AES-GCM key.
-     * If decryption fails (e.g., due to an incorrect key), the original encrypted bytes are returned.
+     * Decrypts the provided encrypted byte array using the specified AES-GCM key.
      *
-     * @param encryptedBytes The byte array to be decrypted.
-     * @param key The AES-GCM key used for decryption.
-     * @return The decrypted byte array if decryption is successful, otherwise the original encrypted byte array.
+     * @param encryptedBytes The byte array representing the encrypted data.
+     * @param key The AES-GCM key to be used for decryption.
+     * @return The decrypted byte array.
+     * @throws DecryptionException If decryption fails due to an invalid key or corrupted data.
      */
-    suspend fun tryDecrypt(
+    suspend fun decrypt(
         encryptedBytes: ByteArray,
         key: AES.GCM.Key
     ): ByteArray {
 
         try {
-
-            /*
-             * Decryption can fail if the key is wrong.
-             * We get different exceptions on the platforms.
-             * In case of an issue we just return the original bytes.
-             */
 
             val cipher = key.cipher()
 
@@ -142,7 +136,14 @@ object CryptoUtil {
             return bytes
 
         } catch (_: Throwable) {
-            return encryptedBytes
+
+
+            /*
+             * Decryption can fail if the key is wrong.
+             * We get different exceptions on the platforms,
+             * so we throw a custom common one.
+             */
+            throw DecryptionException()
         }
     }
 }

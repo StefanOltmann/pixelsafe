@@ -118,7 +118,6 @@ fun ContentView(
                 val hiddenBytes = SteganographyUtil.readLeastSignificantBits(image, password)
 
                 withContext(Dispatchers.Main) {
-                    imageState.value = image
                     hiddenBytesState.value = hiddenBytes
                 }
 

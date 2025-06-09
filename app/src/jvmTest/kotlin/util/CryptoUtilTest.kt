@@ -37,13 +37,13 @@ class CryptoUtilTest {
 
     @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun testEncryptAndTryDecrypt(): Unit = runBlocking {
+    fun testEncryptAndDecrypt(): Unit = runBlocking {
 
         val key = CryptoUtil.deriveKey(testPassword) ?: fail("Key is null.")
 
         val encryptedBytes = CryptoUtil.encrypt(testBytes, key)
 
-        val decryptedBytes = CryptoUtil.tryDecrypt(encryptedBytes, key)
+        val decryptedBytes = CryptoUtil.decrypt(encryptedBytes, key)
 
         /*
          * Should return the same message.

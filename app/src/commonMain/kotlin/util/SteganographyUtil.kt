@@ -82,21 +82,31 @@ object SteganographyUtil {
         else
             SIGNATURE_BYTES_ENCRYPTED_LENGTH
 
-        val actualSignatureBytes =
-            CryptoUtil.decryptIfNeeded(
-                encryptedBytes = readBytesFromBitOffset(
-                    pixelBytes = pixelBytes,
-                    bitOffset = 0,
-                    byteCount = signatureBytesLength
-                ),
-                key = key
-            )
+        try {
 
-        /*
-         * The file must start with "PixelSafe" or doesn't contain hidden data.
-         */
-        if (!signatureBytes.contentEquals(actualSignatureBytes))
+            val actualSignatureBytes =
+                CryptoUtil.decryptIfNeeded(
+                    encryptedBytes = readBytesFromBitOffset(
+                        pixelBytes = pixelBytes,
+                        bitOffset = 0,
+                        byteCount = signatureBytesLength
+                    ),
+                    key = key
+                )
+
+            /*
+             * The file must start with "PixelSafe" or doesn't contain hidden data.
+             */
+            if (!signatureBytes.contentEquals(actualSignatureBytes))
+                return null
+
+        } catch (_: DecryptionException) {
+
+            /*
+             * If we can't decrypt the data with the given key, it must be wrong.
+             */
             return null
+        }
 
         /*
          * Check the length of the data hidden in the image.
