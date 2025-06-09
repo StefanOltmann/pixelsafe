@@ -27,6 +27,8 @@ import ui.icons.AppIcon
 
 fun main() = application {
 
+    println("$APP_NAME $APP_VERSION")
+
     Window(
         onCloseRequest = ::exitApplication,
         state = rememberWindowState(

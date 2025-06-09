@@ -60,6 +60,8 @@ kotlin {
 
     sourceSets {
 
+        sourceSets["commonMain"].kotlin.srcDirs(file("build/generated/source/"))
+
         commonMain.dependencies {
 
             /* Compose */
@@ -148,6 +150,27 @@ dependencies {
         windowsAmd64(compose.desktop.windows_x64)
     }
 }
+
+// region AppBuildConfig
+project.afterEvaluate {
+
+    logger.lifecycle("Generate AppBuildConfig.kt")
+
+    val outputDir = layout.buildDirectory.file("generated/source/").get().asFile
+
+    outputDir.mkdirs()
+
+    val file = File(outputDir.absolutePath, "AppBuildConfig.kt")
+
+    file.printWriter().use { writer ->
+
+        writer.println("/** Current app version. */")
+        writer.println("const val APP_VERSION: String = \"${project.rootProject.version}\"")
+
+        writer.flush()
+    }
+}
+// endregion
 
 // region Work around temporary Compose bugs.
 configurations.all {

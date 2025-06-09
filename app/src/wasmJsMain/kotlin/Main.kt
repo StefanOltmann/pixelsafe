@@ -25,6 +25,8 @@ import org.w3c.dom.HTMLElement
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
 
+    println("$APP_NAME $APP_VERSION")
+
     ComposeViewport(document.body!!) {
 
         hideLoader()

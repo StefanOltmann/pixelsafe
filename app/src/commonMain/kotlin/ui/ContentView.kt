@@ -72,7 +72,9 @@ import ui.icons.Logo
 import util.SteganographyUtil
 import kotlin.math.max
 
-const val UI_UPDATE_DELAY = 100L
+const val UI_UPDATE_DELAY_MS = 100L
+
+const val TEXT_INPUT_BOUNCE_MS = 300L
 
 @Composable
 fun ContentView(
@@ -107,6 +109,12 @@ fun ContentView(
         LaunchedEffect(passwordState.value) {
 
             try {
+
+                /*
+                 * Wait a moment if the user makes additional
+                 * keystrokes in entering the password.
+                 */
+                delay(TEXT_INPUT_BOUNCE_MS)
 
                 val image = imageState.value ?: return@LaunchedEffect
 
@@ -380,7 +388,7 @@ private suspend fun loadImage(
             blockUserInput.value = true
 
             /* Let the UI update */
-            delay(UI_UPDATE_DELAY)
+            delay(UI_UPDATE_DELAY_MS)
 
             val bytes = file.readBytes()
 
@@ -453,7 +461,7 @@ private suspend fun hideDataInImage(
             blockUserInput.value = true
 
             /* Let the UI update */
-            delay(UI_UPDATE_DELAY)
+            delay(UI_UPDATE_DELAY_MS)
 
             val bytesToHide = file.readBytes()
 
@@ -501,7 +509,7 @@ private suspend fun saveHiddenData(
         blockUserInput.value = true
 
         /* Let the UI update */
-        delay(UI_UPDATE_DELAY)
+        delay(UI_UPDATE_DELAY_MS)
 
         val saved = saveBytes(
             fileName = hiddenBytes.first,
@@ -534,7 +542,7 @@ private suspend fun saveModifiedBytes(
         blockUserInput.value = true
 
         /* Let the UI update */
-        delay(UI_UPDATE_DELAY)
+        delay(UI_UPDATE_DELAY_MS)
 
         val saved = saveBytes(
             fileName = selectedFileName,
