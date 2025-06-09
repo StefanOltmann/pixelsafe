@@ -5,7 +5,7 @@ kotlinx-coroutines = "1.10.2"
 androidGitVersion = "0.4.14"
 hydraulicConveyor = "1.12"
 filekit = "0.10.0-beta02"
-skiko = "0.9.4"
+skiko = "0.9.4.2"
 cryptography = "0.4.0"
 
 [libraries]
