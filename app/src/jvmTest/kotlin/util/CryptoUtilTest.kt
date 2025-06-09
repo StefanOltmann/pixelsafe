@@ -22,7 +22,7 @@ class CryptoUtilTest {
         val key = CryptoUtil.deriveKey(testPassword) ?: fail("Key is null.")
 
         assertEquals(
-            expected = "hallo",
+            expected = "343fcb40497549085c98ae137c137116a5c2442eb8dc0bf0cac3a3419ce05b9f",
             actual = key.encodeToByteArray(CryptoUtil.keyFormat).toHexString()
         )
 
