@@ -1,6 +1,6 @@
 <img src="assets/logo.svg" height="128" alt="PixelSafe">
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](httpw://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.1.21-blue.svg?logo=kotlin)](httpw://kotlinlang.org)
 
 <a href="https://ko-fi.com/StefanOltmann">
     <img src="assets/support_me_on_kofi_dark.png" alt="Support me on Ko-fi" width="200">
