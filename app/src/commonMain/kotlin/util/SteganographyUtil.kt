@@ -38,46 +38,64 @@ object SteganographyUtil {
 
     private const val TERMINATOR_BYTE = 0x00.toByte()
 
-    /** The signature to be used to identify hidden data. */
+    /** The signature to be used to identify hidden data: "PixelSafe" */
     private val signatureBytes = byteArrayOf(80, 105, 120, 101, 108, 83, 97, 102, 101)
 
+    /** The unencrypted signature bytes are 9 bytes long.  */
+    private const val SIGNATURE_BYTES_UNENCRYPTED_LENGTH = 9
+
+    /** The encrypted signature bytes are 37 bytes long, regardless of the used password. */
+    private const val SIGNATURE_BYTES_ENCRYPTED_LENGTH = 37
+
     private val terminatorBytes = byteArrayOf(TERMINATOR_BYTE)
-
-    /** The length of the signature (9 bytes). */
-    private val signatureLength = signatureBytes.size
-
-    /** The length data starts after the signature (9 bytes) and is 32 bits (4 bytes). */
-    private val lengthBitOffset = signatureLength * BITS_PER_BYTE
 
     /**
      * Calculates the available space for a hidden message in this image.
      *
      * Each pixel can store 3 bits (RGB), so total capacity is (width * height * 3) bits,
      * or (width * height * 3) / 8 bytes.
+     *
+     * Since we also store the file name, the actual storage capacity is probably lower.
      */
-    fun calculateHiddenSpaceInBytes(image: Image): Long =
-        (image.width * image.height * 3L) / BITS_PER_BYTE - signatureLength - BYTE_COUNT_FOR_LENGTH - 1
+    fun calculateApproximateHiddenSpaceInBytes(image: Image): Long =
+        (image.width * image.height * 3L) / BITS_PER_BYTE -
+            SIGNATURE_BYTES_ENCRYPTED_LENGTH - BYTE_COUNT_FOR_LENGTH - 1
 
     /**
      * Reads data hidden in the least significant bits of an image.
      *
      * Returns file name & bytes
      */
-    fun readLeastSignificantBits(
-        image: Image
+    suspend fun readLeastSignificantBits(
+        image: Image,
+        password: String? = null
     ): Pair<String, ByteArray>? {
 
         val bitmap = toBitmap(image)
 
         val pixelBytes = bitmap.readPixels()!!
 
-        val actualSignature = readBytesFromBitOffset(
-            pixelBytes = pixelBytes,
-            bitOffset = 0,
-            byteCount = signatureLength
-        )
+        val key = CryptoUtil.deriveKey(password)
 
-        if (!signatureBytes.contentEquals(actualSignature))
+        val signatureBytesLength = if (key == null)
+            SIGNATURE_BYTES_UNENCRYPTED_LENGTH
+        else
+            SIGNATURE_BYTES_ENCRYPTED_LENGTH
+
+        val actualSignatureBytes =
+            CryptoUtil.decryptIfNeeded(
+                encryptedBytes = readBytesFromBitOffset(
+                    pixelBytes = pixelBytes,
+                    bitOffset = 0,
+                    byteCount = signatureBytesLength
+                ),
+                key = key
+            )
+
+        /*
+         * The file must start with "PixelSafe" or doesn't contain hidden data.
+         */
+        if (!signatureBytes.contentEquals(actualSignatureBytes))
             return null
 
         /*
@@ -86,7 +104,7 @@ object SteganographyUtil {
 
         val lengthBytes = readBytesFromBitOffset(
             pixelBytes = pixelBytes,
-            bitOffset = lengthBitOffset,
+            bitOffset = signatureBytesLength * BITS_PER_BYTE,
             byteCount = BYTE_COUNT_FOR_LENGTH
         )
 
@@ -99,7 +117,7 @@ object SteganographyUtil {
          * Validate the length of the data hidden in the image.
          */
 
-        val maxDataLength = calculateHiddenSpaceInBytes(image)
+        val maxDataLength = calculateApproximateHiddenSpaceInBytes(image)
 
         if (length <= 0 || length > maxDataLength)
             return null
@@ -108,23 +126,28 @@ object SteganographyUtil {
          * Read the data hidden in the image.
          */
 
-        val dataBitOffset = lengthBitOffset + 32
+        val payloadBitOffset =
+            signatureBytesLength * BITS_PER_BYTE + BYTE_COUNT_FOR_LENGTH * BITS_PER_BYTE
 
-        val allData = readBytesFromBitOffset(
-            pixelBytes = pixelBytes,
-            bitOffset = dataBitOffset,
-            byteCount = length
-        )
+        val payloadData =
+            CryptoUtil.decryptIfNeeded(
+                encryptedBytes = readBytesFromBitOffset(
+                    pixelBytes = pixelBytes,
+                    bitOffset = payloadBitOffset,
+                    byteCount = length
+                ),
+                key = key
+            )
 
-        val indexOfTerminator = allData.indexOfFirst { it == TERMINATOR_BYTE }
+        val indexOfTerminator = payloadData.indexOfFirst { it == TERMINATOR_BYTE }
 
         /* Without terminator the data stream is illegal */
         if (indexOfTerminator == -1)
             return null
 
-        val fileName = allData.sliceArray(0 until indexOfTerminator).decodeToString()
+        val fileName = payloadData.sliceArray(0 until indexOfTerminator).decodeToString()
 
-        val data = allData.sliceArray(indexOfTerminator + 1 until allData.size)
+        val data = payloadData.sliceArray(indexOfTerminator + 1 until payloadData.size)
 
         return fileName to data
     }
@@ -204,23 +227,29 @@ object SteganographyUtil {
     /**
      * Writes data to the least significant bits of an image.
      */
-    fun writeLeastSignificantBits(
+    suspend fun writeLeastSignificantBits(
         image: Image,
         fileName: String,
-        byteArray: ByteArray
+        bytes: ByteArray,
+        password: String? = null
     ): Image {
 
+        val key = password?.let { CryptoUtil.deriveKey(password = it) }
+
+        val encryptedSignatureBytes =
+            CryptoUtil.encryptIfNeeded(signatureBytes, key)
+
+        val payloadBytes =
+            CryptoUtil.encryptIfNeeded(
+                bytes = fileName.encodeToByteArray() + terminatorBytes + bytes,
+                key = key
+            )
+
         /*
-         * Write filename bytes
+         * Encode the length of the data to be hidden to a byte array.
          */
 
-        val filenameBytes = fileName.encodeToByteArray()
-
-        /*
-         * Write the length of the data to be hidden to a byte array.
-         */
-
-        val payloadLength = filenameBytes.size + 1 + byteArray.size
+        val payloadLength = payloadBytes.size
 
         val lengthBytes = ByteArray(BYTE_COUNT_FOR_LENGTH)
 
@@ -231,19 +260,18 @@ object SteganographyUtil {
 
         /*
          * Prepare the data to be hidden:
-         * Signature (9 bytes) + Length (4 bytes) + Filename (n bytes) + NUL + Data (n bytes) + NUL
+         * Signature + Length (4 bytes) + Filename (n bytes) + NUL + Data (n bytes) + NUL
          */
-        val dataToWrite = signatureBytes + lengthBytes +
-            filenameBytes + terminatorBytes + byteArray + terminatorBytes
+        val dataToWrite = encryptedSignatureBytes + lengthBytes + payloadBytes + terminatorBytes
 
         /*
          * Check if there is enough space for the data to be hidden.
          */
 
-        val availableSpace = calculateHiddenSpaceInBytes(image)
+        val availableSpace = calculateApproximateHiddenSpaceInBytes(image)
 
         if (dataToWrite.size > availableSpace)
-            error("Not enough space in the image for the given byte array: ${byteArray.size} > $availableSpace")
+            error("Not enough space in the image for the given byte array: ${bytes.size} > $availableSpace")
 
         /*
          * Write the data to the least significant bits of the image.

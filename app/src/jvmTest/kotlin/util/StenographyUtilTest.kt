@@ -19,6 +19,7 @@
 
 package util
 
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.skia.Image
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -28,6 +29,8 @@ import kotlin.test.assertNotNull
 class StenographyUtilTest {
 
     private val fileName = "my_secret_message.txt"
+
+    private val testPassword: String = "TheBestPasswordEver1337"
 
     private val hiddenTestBytesInTestPng = """
         Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
@@ -57,17 +60,17 @@ class StenographyUtilTest {
 
         val image = Image.Companion.makeFromEncoded(testBytes)
 
-        val hiddenSpace = SteganographyUtil.calculateHiddenSpaceInBytes(image)
+        val hiddenSpace = SteganographyUtil.calculateApproximateHiddenSpaceInBytes(image)
 
         assertEquals(
-            expected = 24562L,
+            expected = 24534L,
             actual = hiddenSpace
         )
     }
 
     @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun testReadLeastSignificantBits() {
+    fun testReadLeastSignificantBits() = runBlocking {
 
         val testBytes = readTestBytes("test.png")
 
@@ -90,7 +93,7 @@ class StenographyUtilTest {
 
     @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun testWriteLeastSignificantBits() {
+    fun testWriteLeastSignificantBits() = runBlocking {
 
         val testBytes = readTestBytes("test.png")
 
@@ -99,7 +102,7 @@ class StenographyUtilTest {
         val resultingImage = SteganographyUtil.writeLeastSignificantBits(
             image = image,
             fileName = fileName,
-            byteArray = hiddenTestBytesForRoundTrip
+            bytes = hiddenTestBytesForRoundTrip
         )
 
         val actualBytes = resultingImage.encodeToData()!!.bytes
@@ -114,19 +117,60 @@ class StenographyUtilTest {
 
     @OptIn(ExperimentalStdlibApi::class)
     @Test
-    fun testReadAndWriteLeastSignificantBits() {
+    fun testReadAndWriteLeastSignificantBits() = runBlocking {
 
         val testBytes = readTestBytes("test.png")
 
         val image = Image.Companion.makeFromEncoded(testBytes)
 
+        assertNotNull(image)
+
         val resultingImage = SteganographyUtil.writeLeastSignificantBits(
             image = image,
             fileName = fileName,
-            byteArray = hiddenTestBytesForRoundTrip
+            bytes = hiddenTestBytesForRoundTrip
         )
 
+        assertNotNull(resultingImage)
+
         val result = SteganographyUtil.readLeastSignificantBits(resultingImage)
+
+        assertNotNull(result)
+
+        assertEquals(
+            expected = fileName,
+            actual = result.first
+        )
+
+        assertContentEquals(
+            expected = hiddenTestBytesForRoundTrip,
+            actual = result.second
+        )
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    @Test
+    fun testReadAndWriteLeastSignificantBitsWithPassword() = runBlocking {
+
+        val testBytes = readTestBytes("test.png")
+
+        val image = Image.Companion.makeFromEncoded(testBytes)
+
+        assertNotNull(image)
+
+        val resultingImage = SteganographyUtil.writeLeastSignificantBits(
+            image = image,
+            fileName = fileName,
+            bytes = hiddenTestBytesForRoundTrip,
+            password = testPassword
+        )
+
+        assertNotNull(resultingImage)
+
+        val result = SteganographyUtil.readLeastSignificantBits(
+            image = resultingImage,
+            password = testPassword
+        )
 
         assertNotNull(result)
 

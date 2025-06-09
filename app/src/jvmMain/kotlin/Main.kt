@@ -30,7 +30,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         state = rememberWindowState(
-            size = DpSize(352.dp, 740.dp)
+            size = DpSize(352.dp, 810.dp)
         ),
         resizable = false,
         title = APP_NAME,

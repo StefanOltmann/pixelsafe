@@ -34,7 +34,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +45,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -91,6 +98,40 @@ fun ContentView(
 
         val hiddenBytesState: MutableState<Pair<String, ByteArray>?> = remember { mutableStateOf(null) }
 
+        val passwordState: MutableState<String> = remember { mutableStateOf("") }
+
+        /*
+         * Try to decode bytes if the password changes.
+         */
+        LaunchedEffect(passwordState.value) {
+
+            try {
+
+                val image = imageState.value ?: return@LaunchedEffect
+
+                /*
+                 * Don't skip here if the password is null or empty, because
+                 * the user may have entered something and erased it again.
+                 */
+                val password = passwordState.value
+
+                val hiddenBytes = SteganographyUtil.readLeastSignificantBits(image, password)
+
+                withContext(Dispatchers.Main) {
+                    imageState.value = image
+                    hiddenBytesState.value = hiddenBytes
+                }
+
+            } catch (ex: Throwable) {
+
+                showToast(Toast(ToastType.ERROR, "Can't decode hidden data."))
+
+                ex.printStackTrace()
+            }
+        }
+
+        val focusManager = LocalFocusManager.current
+
         androidx.compose.foundation.Image(
             imageVector = Logo,
             contentDescription = null,
@@ -123,7 +164,8 @@ fun ContentView(
                         imageState,
                         hiddenBytesState,
                         blockUserInput,
-                        showToast
+                        showToast,
+                        passwordState.value
                     )
                 }
             }
@@ -166,7 +208,7 @@ fun ContentView(
         imageState.value?.let { image ->
 
             val storageSize = remember(image) {
-                SteganographyUtil.calculateHiddenSpaceInBytes(image)
+                SteganographyUtil.calculateApproximateHiddenSpaceInBytes(image)
             }
 
             Column(
@@ -220,6 +262,30 @@ fun ContentView(
                 modifier = Modifier.Companion.height(8.dp)
             )
 
+            TextField(
+                value = passwordState.value,
+                onValueChange = { passwordState.value = it },
+                label = { Text("Optional: Encryption password") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.Companion.width(288.dp)
+                    .onPreviewKeyEvent { keyEvent ->
+
+                        if (keyEvent.key == Key.Enter || keyEvent.key == Key.Tab) {
+
+                            focusManager.clearFocus()
+
+                            true
+
+                        } else {
+                            false
+                        }
+                    }
+            )
+
+            Spacer(
+                modifier = Modifier.Companion.height(8.dp)
+            )
+
             Button(
                 modifier = Modifier.Companion.width(288.dp),
                 onClick = {
@@ -232,6 +298,7 @@ fun ContentView(
                             originalBytesState,
                             hiddenBytesState,
                             blockUserInput,
+                            passwordState.value,
                             showToast
                         )
                     }
@@ -291,7 +358,8 @@ private suspend fun loadImage(
     imageState: MutableState<Image?>,
     hiddenBytesState: MutableState<Pair<String, ByteArray>?>,
     blockUserInput: MutableState<Boolean>,
-    showToast: (Toast) -> Unit
+    showToast: (Toast) -> Unit,
+    password: String
 ) = withContext(Dispatchers.Default) {
 
     val file = FileKit.openFilePicker(
@@ -318,14 +386,15 @@ private suspend fun loadImage(
             yield()
 
             val image = Image.Companion.makeFromEncoded(bytes)
-            val hiddenBytes = SteganographyUtil.readLeastSignificantBits(image)
+
+            val hiddenBytes = SteganographyUtil.readLeastSignificantBits(image, password)
 
             withContext(Dispatchers.Main) {
                 imageState.value = image
                 hiddenBytesState.value = hiddenBytes
             }
 
-        } catch (ex: Exception) {
+        } catch (ex: Throwable) {
 
             showToast(Toast(ToastType.ERROR, "Can't load image."))
 
@@ -346,6 +415,7 @@ private suspend fun hideDataInImage(
     originalBytesState: MutableState<ByteArray?>,
     hiddenBytesState: MutableState<Pair<String, ByteArray>?>,
     blockUserInput: MutableState<Boolean>,
+    password: String,
     showToast: (Toast) -> Unit
 ) = withContext(Dispatchers.Default) {
 
@@ -380,7 +450,8 @@ private suspend fun hideDataInImage(
             val modifiedImage = SteganographyUtil.writeLeastSignificantBits(
                 image = image,
                 fileName = file.name,
-                byteArray = bytesToHide
+                bytes = bytesToHide,
+                password = password
             )
 
             yield()
