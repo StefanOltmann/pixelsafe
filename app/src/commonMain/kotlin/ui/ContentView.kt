@@ -60,6 +60,7 @@ import io.github.vinceglb.filekit.dialogs.openFilePicker
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.size
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -120,6 +121,12 @@ fun ContentView(
                 withContext(Dispatchers.Main) {
                     hiddenBytesState.value = hiddenBytes
                 }
+
+            } catch (_: CancellationException) {
+
+                /*
+                 * We can ignore this if the user enters data in quick succession.
+                 */
 
             } catch (ex: Throwable) {
 
@@ -392,6 +399,12 @@ private suspend fun loadImage(
                 imageState.value = image
                 hiddenBytesState.value = hiddenBytes
             }
+
+        } catch (_: CancellationException) {
+
+            /*
+             * We can ignore this if the user quickly chooses another image.
+             */
 
         } catch (ex: Throwable) {
 

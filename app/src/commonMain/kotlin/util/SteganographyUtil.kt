@@ -19,6 +19,7 @@
 
 package util
 
+import kotlinx.coroutines.yield
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.Image
@@ -75,6 +76,9 @@ object SteganographyUtil {
 
         val pixelBytes = bitmap.readPixels()!!
 
+        /* Check for cancellation */
+        yield()
+
         val key = CryptoUtil.deriveKey(password)
 
         val signatureBytesLength = if (key == null)
@@ -108,6 +112,9 @@ object SteganographyUtil {
             return null
         }
 
+        /* Check for cancellation */
+        yield()
+
         /*
          * Check the length of the data hidden in the image.
          */
@@ -132,6 +139,9 @@ object SteganographyUtil {
         if (length <= 0 || length > maxDataLength)
             return null
 
+        /* Check for cancellation */
+        yield()
+
         /*
          * Read the data hidden in the image.
          */
@@ -149,11 +159,17 @@ object SteganographyUtil {
                 key = key
             )
 
+        /* Check for cancellation */
+        yield()
+
         val indexOfTerminator = payloadData.indexOfFirst { it == TERMINATOR_BYTE }
 
         /* Without terminator the data stream is illegal */
         if (indexOfTerminator == -1)
             return null
+
+        /* Check for cancellation */
+        yield()
 
         val fileName = payloadData.sliceArray(0 until indexOfTerminator).decodeToString()
 
