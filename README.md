@@ -1,10 +1,10 @@
 <img src="assets/logo.svg" height="128" alt="PixelSafe">
 
-[![Kotlin](https://img.shields.io/badge/kotlin-2.1.21-blue.svg?logo=kotlin)](httpw://kotlinlang.org)
+![Kotlin](https://img.shields.io/badge/kotlin-2.1.21-blue.svg?logo=kotlin)
+![JVM](https://img.shields.io/badge/-JVM-gray.svg?style=flat)
+![WASM](https://img.shields.io/badge/-WASM-gray.svg?style=flat)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-gray?&logo=GitHub-Sponsors&logoColor=EA4AAA)](https://github.com/sponsors/StefanOltmann)
 
-<a href="https://ko-fi.com/StefanOltmann">
-    <img src="assets/support_me_on_kofi_dark.png" alt="Support me on Ko-fi" width="200">
-</a>
 <br>
 <a href="https://apps.microsoft.com/detail/9PK3MLFQ1JBF?mode=popup">
     <img src="https://get.microsoft.com/images/en-us%20dark.svg" alt="Download from Microsoft Store">
