@@ -1,6 +1,7 @@
 <img src="assets/logo.svg" height="128" alt="PixelSafe">
 
 ![Kotlin](https://img.shields.io/badge/kotlin-2.2.20-blue.svg?logo=kotlin)
+[![License: GPL v3](https://img.shields.io/badge/license-AGPL--3.0-orange.svg)](https://www.gnu.org/licenses/agpl-3.0)
 ![JVM](https://img.shields.io/badge/-JVM-gray.svg?style=flat)
 ![WASM](https://img.shields.io/badge/-WASM-gray.svg?style=flat)
 [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-gray?&logo=GitHub-Sponsors&logoColor=EA4AAA)](https://github.com/sponsors/StefanOltmann)
