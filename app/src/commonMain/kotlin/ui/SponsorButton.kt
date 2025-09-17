@@ -22,50 +22,46 @@ package ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ui.icons.IconGitHubSponsors
+
+private val backgroundColor = Color(0xFF28292A)
+private val heartColor = Color(0xFFEA4AAA)
 
 @Composable
-fun AppFooter() {
-
-    val uriHandler = LocalUriHandler.current
+fun SponsorButton(
+    onClick: () -> Unit
+) {
 
     Row(
-        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
-            .height(32.dp)
-            .background(Color.Black)
-            .fillMaxWidth()
-            .padding(
-                horizontal = 2.dp
-            )
-            .clickable {
-                uriHandler.openUri("https://github.com/sponsors/StefanOltmann")
-            }
+            .background(backgroundColor, RoundedCornerShape(4.dp))
+            .height(24.dp)
+            .padding(horizontal = 8.dp)
+            .clickable(onClick = onClick)
     ) {
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = "Made by Stefan Oltmann",
-            color = Color.White,
-            fontSize = 14.sp,
-            modifier = Modifier.offset(y = -1.dp)
+        Icon(
+            imageVector = IconGitHubSponsors,
+            contentDescription = null,
+            tint = heartColor,
+            modifier = Modifier.size(16.dp)
         )
-
-        Spacer(modifier = Modifier.weight(1F))
-
-        SponsorButton(
-            onClick = {
-                uriHandler.openUri("https://github.com/sponsors/StefanOltmann")
-            }
+        Text(
+            text = "Sponsor",
+            fontSize = 14.sp,
+            color = Color.White,
+            maxLines = 1,
+            modifier = Modifier.offset(y = -1.dp)
         )
     }
 }
