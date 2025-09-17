@@ -1,12 +1,12 @@
 [versions]
-compose-multiplatform = "1.8.1"
-kotlin = "2.1.21"
+kotlin = "2.2.20"
+compose-multiplatform = "1.9.0"
 kotlinx-coroutines = "1.10.2"
 androidGitVersion = "0.4.14"
+filekit = "0.11.0"
+skiko = "0.9.22.2"
+cryptography = "0.5.0"
 hydraulicConveyor = "1.12"
-filekit = "0.10.0-beta02"
-skiko = "0.9.4.2"
-cryptography = "0.4.0"
 
 [libraries]
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
