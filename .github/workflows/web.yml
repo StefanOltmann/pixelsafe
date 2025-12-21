@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to web
 
 on:
   push:
@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
           java-version: '17'
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: List all files
         run: find .
       - name: Run Gradle build
@@ -31,22 +31,12 @@ jobs:
           chmod -v -R +rX "app/build/dist/wasmJs/productionExecutable/" | while read line; do
             echo "::warning title=Invalid file permissions automatically fixed::$line"
           done
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy over FTP
+        uses: modern-dev/ftp-mirror@v2
         with:
-          path: app/build/dist/wasmJs/productionExecutable/
-  
-  deploy:
-    needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        timeout-minutes: 15
-        id: deployment
-        uses: actions/deploy-pages@v4
+          server: ${{ secrets.FTP_SERVER }}
+          user: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local_dir: "app/build/dist/wasmJs/productionExecutable"
+          remote_dir: "/httpdocs/pixelsafe/"
+          delete: true
