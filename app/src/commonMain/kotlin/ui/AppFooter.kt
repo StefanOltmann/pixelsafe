@@ -47,7 +47,7 @@ fun AppFooter() {
                 horizontal = 2.dp
             )
             .clickable {
-                uriHandler.openUri("https://github.com/sponsors/StefanOltmann")
+                uriHandler.openUri("https://stefan-oltmann.de")
             }
     ) {
 
