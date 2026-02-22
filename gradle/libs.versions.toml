@@ -1,10 +1,10 @@
 [versions]
-kotlin = "2.3.0"
-compose-multiplatform = "1.9.3"
+kotlin = "2.3.10"
+compose-multiplatform = "1.10.1"
 kotlinx-coroutines = "1.10.2"
 androidGitVersion = "0.4.14"
-filekit = "0.11.0"
-skiko = "0.9.22.2"
+filekit = "0.12.0"
+skiko = "0.9.37.4"
 cryptography = "0.5.0"
 hydraulicConveyor = "1.12"
 

@@ -30,7 +30,7 @@ kotlin {
 
     jvm()
 
-    jvmToolchain(jdkVersion = 17)
+    jvmToolchain(jdkVersion = 25)
 
     if (buildTarget == "web") {
 
@@ -172,15 +172,6 @@ project.afterEvaluate {
         writer.println("const val APP_VERSION: String = \"${project.version}\"")
 
         writer.flush()
-    }
-}
-// endregion
-
-// region Work around temporary Compose bugs.
-configurations.all {
-    attributes {
-        // https://github.com/JetBrains/compose-jb/issues/1404#issuecomment-1146894731
-        attribute(Attribute.of("ui", String::class.java), "awt")
     }
 }
 // endregion
