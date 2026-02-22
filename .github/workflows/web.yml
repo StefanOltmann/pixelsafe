@@ -16,8 +16,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '17'
+          distribution: 'zulu'
+          java-version: '25'
       - name: Checkout code
         uses: actions/checkout@v4
       - name: List all files
