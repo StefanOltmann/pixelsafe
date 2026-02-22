@@ -1,5 +1,7 @@
 import io.github.kdroidfilter.nucleus.desktop.application.dsl.AppImageCategory
 import io.github.kdroidfilter.nucleus.desktop.application.dsl.CompressionLevel
+import io.github.kdroidfilter.nucleus.desktop.application.dsl.ReleaseChannel
+import io.github.kdroidfilter.nucleus.desktop.application.dsl.ReleaseType
 import io.github.kdroidfilter.nucleus.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
@@ -108,6 +110,22 @@ nucleus.application {
 
     nativeDistributions {
 
+        /* Package metadata */
+        packageName = "PixelSafe"
+        packageVersion = if (androidGitVersion.code() == 0)
+            "1.0.0"
+        else
+            version.toString()
+        description = "Steganography tool for PNG images"
+        vendor = "Stefan Oltmann"
+        copyright = "Copyright 2026 Stefan Oltmann"
+        homepage = "https://stefan-oltmann.de"
+
+        /* Nucleus features */
+        cleanupNativeLibs = true
+        enableAotCache = true
+        compressionLevel = CompressionLevel.Maximum
+
         targetFormats(
 
             /* Windows Store */
@@ -136,17 +154,16 @@ nucleus.application {
             }
         }
 
-        packageName = "PixelSafe"
-
-        packageVersion = if (androidGitVersion.code() == 0)
-            "1.0.0"
-        else
-            version.toString()
-
-        /* Nucleus features */
-        cleanupNativeLibs = true
-        enableAotCache = true
-        compressionLevel = CompressionLevel.Maximum
+        publish {
+            github {
+                enabled = true
+                owner = "StefanOltmann"
+                repo = "pixelsafe"
+                token = System.getenv("GITHUB_TOKEN")
+                channel = ReleaseChannel.Latest
+                releaseType = ReleaseType.Release
+            }
+        }
 
         windows {
 
@@ -209,7 +226,7 @@ nucleus.application {
 
                 /* Desktop entry fields */
                 genericName = packageName
-                synopsis = "Steganography tool for PNG images"
+                synopsis = description
             }
         }
     }
