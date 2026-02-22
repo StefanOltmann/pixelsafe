@@ -71,24 +71,24 @@ jobs:
         with:
           name: release-assets-${{ runner.os }}-${{ matrix.arch }}
           path: |
-            build/compose/binaries/**/*.dmg
-            build/compose/binaries/**/*.pkg
-            build/compose/binaries/**/*.exe
-            build/compose/binaries/**/*.msi
-            build/compose/binaries/**/*.appx
-            build/compose/binaries/**/*.deb
-            build/compose/binaries/**/*.rpm
-            build/compose/binaries/**/*.AppImage
-            build/compose/binaries/**/*.snap
-            build/compose/binaries/**/*.flatpak
-            build/compose/binaries/**/*.zip
-            build/compose/binaries/**/*.tar
-            build/compose/binaries/**/*.7z
-            build/compose/binaries/**/*.blockmap
-            build/compose/binaries/**/signing-metadata.json
-            build/compose/binaries/**/packaging-metadata.json
-            !build/compose/binaries/**/app/**
-            !build/compose/binaries/**/runtime/**
+            app/build/compose/binaries/**/*.dmg
+            app/build/compose/binaries/**/*.pkg
+            app/build/compose/binaries/**/*.exe
+            app/build/compose/binaries/**/*.msi
+            app/build/compose/binaries/**/*.appx
+            app/build/compose/binaries/**/*.deb
+            app/build/compose/binaries/**/*.rpm
+            app/build/compose/binaries/**/*.AppImage
+            app/build/compose/binaries/**/*.snap
+            app/build/compose/binaries/**/*.flatpak
+            app/build/compose/binaries/**/*.zip
+            app/build/compose/binaries/**/*.tar
+            app/build/compose/binaries/**/*.7z
+            app/build/compose/binaries/**/*.blockmap
+            app/build/compose/binaries/**/signing-metadata.json
+            app/build/compose/binaries/**/packaging-metadata.json
+            !app/build/compose/binaries/**/app/**
+            !app/build/compose/binaries/**/runtime/**
           if-no-files-found: error
 
   publish:
