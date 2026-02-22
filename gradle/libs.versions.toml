@@ -6,11 +6,16 @@ androidGitVersion = "0.4.14"
 filekit = "0.12.0"
 skiko = "0.9.37.4"
 cryptography = "0.5.0"
-hydraulicConveyor = "1.12"
+nucleus = "1.2.7"
 
 [libraries]
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+
+# Nucleus
+nucleus-aot = { group = "io.github.kdroidfilter", name = "nucleus.aot-runtime", version.ref = "nucleus" }
+nucleus-decoratedWindow = { group = "io.github.kdroidfilter", name = "nucleus.decorated-window", version.ref = "nucleus" }
+
 
 # FileKit
 filekit-core = { group = "io.github.vinceglb", name = "filekit-core", version.ref = "filekit" }
@@ -30,4 +35,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-mu
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 androidGitVersion = { id = "com.gladed.androidgitversion", version.ref = "androidGitVersion" }
-hydraulicConveyor = { id = "dev.hydraulic.conveyor", version.ref = "hydraulicConveyor" }
+nucleus = { id = "io.github.kdroidfilter.nucleus", version.ref = "nucleus" }

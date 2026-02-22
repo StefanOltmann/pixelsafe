@@ -17,28 +17,64 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import io.github.kdroidfilter.nucleus.aot.runtime.AotRuntime
+import io.github.kdroidfilter.nucleus.window.DecoratedWindow
+import io.github.kdroidfilter.nucleus.window.NucleusDecoratedWindowTheme
+import io.github.kdroidfilter.nucleus.window.TitleBar
+import io.github.kdroidfilter.nucleus.window.newFullscreenControls
 import ui.icons.AppIcon
+import kotlin.system.exitProcess
 
-fun main() = application {
+fun main() {
 
-    println("$APP_NAME $APP_VERSION")
+    if (AotRuntime.isTraining()) {
+        Thread({
+            Thread.sleep(30_000)
+            exitProcess(0)
+        }, "aot-timer").apply {
+            isDaemon = true
+            start()
+        }
+    }
 
-    Window(
-        onCloseRequest = ::exitApplication,
-        state = rememberWindowState(
-            size = DpSize(352.dp, 810.dp)
-        ),
-        resizable = false,
-        title = APP_NAME,
-        icon = rememberVectorPainter(AppIcon)
-    ) {
+    application {
 
-        App()
+        println("$APP_NAME $APP_VERSION")
+
+        NucleusDecoratedWindowTheme(isDark = false) {
+
+            DecoratedWindow(
+                onCloseRequest = ::exitApplication,
+                state = rememberWindowState(
+                    size = DpSize(352.dp, 810.dp)
+                ),
+                resizable = false,
+                title = APP_NAME,
+                icon = rememberVectorPainter(AppIcon)
+            ) {
+
+                TitleBar(modifier = Modifier.newFullscreenControls()) { _ ->
+                    Text(
+                        title,
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(horizontal = 16.dp),
+                        color = MaterialTheme.colors.onSurface,
+                    )
+                }
+
+                App()
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="Desktop" type="GradleRunConfiguration" factoryName="Gradle">
+    <configuration default="false" name="Package" type="GradleRunConfiguration" factoryName="Gradle">
         <ExternalSystemSettings>
             <option name="executionName"/>
             <option name="externalProjectPath" value="$PROJECT_DIR$"/>
@@ -10,7 +10,7 @@
             </option>
             <option name="taskNames">
                 <list>
-                    <option value="run"/>
+                    <option value="packageReleaseDistributionForCurrentOS"/>
                 </list>
             </option>
             <option name="vmOptions"/>
@@ -22,6 +22,9 @@
         <RunAsTest>false</RunAsTest>
         <GradleProfilingDisabled>false</GradleProfilingDisabled>
         <GradleCoverageDisabled>false</GradleCoverageDisabled>
-        <method v="2"/>
+        <method v="2">
+            <option name="Gradle.BeforeRunTask" enabled="true" tasks="clean" externalProjectPath="$PROJECT_DIR$"
+                    vmOptions="" scriptParameters=""/>
+        </method>
     </configuration>
 </component>
