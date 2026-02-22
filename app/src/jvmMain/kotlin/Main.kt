@@ -56,7 +56,7 @@ fun main() {
             DecoratedWindow(
                 onCloseRequest = ::exitApplication,
                 state = rememberWindowState(
-                    size = DpSize(352.dp, 810.dp)
+                    size = DpSize(352.dp, 815.dp)
                 ),
                 resizable = false,
                 title = APP_NAME,
