@@ -1,7 +1,8 @@
 .DS_Store
 .gradle
-.idea/workspace.xml
 .kotlin
+/.idea/
+/.idea/artifacts/
 /output/
 app/build
 build/
