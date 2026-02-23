@@ -1,12 +1,8 @@
-!src/**/build/
-**/build/
-*.iml
 .DS_Store
-.cxx
-.externalNativeBuild
 .gradle
-.idea
+.idea/workspace.xml
 .kotlin
 /output/
-captures
+app/build
+build/
 local.properties
