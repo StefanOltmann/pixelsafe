@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.MaterialTheme
@@ -33,11 +34,16 @@ fun App() {
 
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
+            background = Color.White,
             primary = Color.Black
         )
     ) {
 
-        Column {
+        Column(
+            modifier = Modifier.background(
+                MaterialTheme.colors.background
+            )
+        ) {
 
             Box(modifier = Modifier.weight(1f)) {
 
