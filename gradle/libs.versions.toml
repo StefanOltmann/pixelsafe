@@ -6,7 +6,7 @@ androidGitVersion = "0.4.14"
 filekit = "0.12.0"
 skiko = "0.9.37.4"
 cryptography = "0.5.0"
-nucleus = "1.2.7"
+nucleus = "1.3.8"
 
 [libraries]
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
@@ -14,7 +14,7 @@ kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.re
 
 # Nucleus
 nucleus-aot = { group = "io.github.kdroidfilter", name = "nucleus.aot-runtime", version.ref = "nucleus" }
-nucleus-decoratedWindow = { group = "io.github.kdroidfilter", name = "nucleus.decorated-window", version.ref = "nucleus" }
+nucleus-decoratedWindow = { group = "io.github.kdroidfilter", name = "nucleus.decorated-window-jni", version.ref = "nucleus" }
 
 
 # FileKit
