@@ -193,7 +193,7 @@ nucleus.application {
                 publisherDisplayName = "Stefan Oltmann"
 
                 /* Languages */
-                languages = listOf("en-US", "de-DE")
+                languages = listOf("en")
 
                 /* Visual */
                 backgroundColor = "#001F3F"

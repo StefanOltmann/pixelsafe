@@ -13,7 +13,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'jetbrains'
+          distribution: 'zulu'
           java-version: '25'
       - name: Checkout code
         uses: actions/checkout@v4
