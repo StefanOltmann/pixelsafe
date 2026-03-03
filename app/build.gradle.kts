@@ -126,6 +126,9 @@ nucleus.application {
         enableAotCache = true
         compressionLevel = CompressionLevel.Maximum
 
+        /* Fix crash on systems with active accessibility */
+        modules("jdk.accessibility")
+
         targetFormats(
 
             /* Windows Store */
